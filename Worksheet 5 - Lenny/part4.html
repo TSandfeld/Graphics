@@ -1,0 +1,88 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>02561 Worksheet 5 - Part 3</title>
+
+    
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../common/initShaders.js"></script>
+    <script type="text/javascript" src="../common/MV.js"></script>
+    <script type="text/javascript" src="../common/OBJParser.js"></script>
+    <script type="text/javascript" src="part4.js"></script>
+    
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 a_Position;
+        attribute vec4 a_Color;
+        attribute vec4 a_Normal;
+        uniform mat4 u_MvpMatrix;
+        uniform mat4 u_vMatrix;
+        uniform mat3 u_NormalMatrix;
+        varying vec4 v_Color;
+        uniform vec4 lightPosition;
+        uniform float shininess;
+        uniform vec4 ambientProduct, specularProduct;
+        
+        void main() {
+            // pos is vertex position in eye coordinates
+            vec3 pos = (u_vMatrix * a_Position).xyz;
+            
+            // vector from vertex position to light source
+            vec3 L;
+            // check for directional light
+            if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
+            else L = normalize( lightPosition.xyz - pos );
+        
+            // Because the eye point the is at the orgin
+            // the vector from the vertex position to the eye is
+            vec3 E = -normalize( pos );
+            
+            // halfway vector
+            vec3 H = normalize( L + E );
+        
+            // Transform vertex normal into eye coordinates
+            vec3 N = normalize( u_NormalMatrix * a_Normal.xyz);
+            // Compute terms in the illumination equation
+            vec4 ambient = ambientProduct;
+        
+            float Kd = max( dot(L, N), 0.0 );
+            vec4 diffuseProduct = a_Color * vec4( 1.0, 1.0, 1.0, 1.0 );
+            vec4 diffuse = Kd * diffuseProduct;
+        
+            float Ks = pow( max(dot(N, H), 0.0), shininess );
+            vec4  specular = Ks * specularProduct;
+            
+            if( dot(L, N) < 0.0 ) {
+                specular = vec4(0.0, 0.0, 0.0, 1.0);
+            } 
+            gl_Position = u_MvpMatrix * a_Position;
+            v_Color = ambient + diffuse + specular;
+            v_Color.a = 1.0;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        varying vec4 v_Color;
+
+        void main() {
+          gl_FragColor = v_Color;
+        }
+    </script>
+</head>
+
+<body onload="WebGLStart()">
+    <canvas id="gl-canvas" width="512" height="512">
+        Your browser doesn't support the HTML5 canvas element
+    </canvas>
+
+    <b>
+        <p>
+            Explain how you obtain and use surface normals, and explain how this relates to the surface smoothness when you are rendering a triangle mesh.
+        </p>
+    </b>
+</body>
+</html>

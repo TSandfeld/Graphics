@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<head>
+    <title>02561 Worksheet 6 - Part 3</title>
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../common/initShaders.js"></script>
+    <script type="text/javascript" src="../common/MV.js"></script>
+    <script type="text/javascript" src="part3.js"></script>
+</head>
+<html>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+
+        varying vec4 fPosition;
+        varying vec4 fCameraPos;
+
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+
+        void main() 
+        {
+            fPosition = vPosition;
+            fCameraPos = ((projectionMatrix*modelViewMatrix) * vPosition);
+            gl_Position = fCameraPos;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        varying vec4 fPosition;
+        varying vec4 fCameraPos;
+
+        uniform sampler2D texture;
+        uniform vec3 vCameraEye;
+        uniform vec3 vCameraLight;
+  
+        float atan2(float y, float x) {
+            return 2.0 * atan((length(vec2(x, y)) - x) / y);
+        }
+
+        void main() {
+            float pi = 3.1415926;
+            vec3 n = normalize(fPosition.xyz);
+            float u = 0.5 + atan2(n.z, - n.x) / (2.0 * pi);
+            float v = 0.5 - (asin(n.y) / pi);
+            
+            vec4 ka = vec4(0.5, 0.5, 0.5, 1.0);
+            vec4 kd = vec4(1.0, 1.0, 1.0, 1.0);
+            
+            vec3 l = normalize(vCameraLight);
+            vec3 e = normalize(vCameraEye);
+            vec3 r = normalize(2.0 * dot(l, n) * n - l);
+            
+            vec4 ambient = ka;
+            float angle = dot(l, n);
+            vec4 diffuse = kd * max(angle, 0.0);
+            
+            gl_FragColor = (ambient + diffuse) * texture2D(texture, vec2(u, v));
+        }
+    </script>
+
+    <body>
+        <h1>Part 3:</h1>
+        <canvas id="c" height="512" width="512">
+            Please use a HTML5 supported browser.
+        </canvas>
+    </body>
+</html>

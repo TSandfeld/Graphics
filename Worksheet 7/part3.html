@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<head>
+    <title>02561 Worksheet 7 - Part 3</title>
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../common/initShaders.js"></script>
+    <script type="text/javascript" src="../common/MV.js"></script>
+    <script type="text/javascript" src="part3.js"></script>
+</head>
+<html>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute  vec4 vPosition;
+        attribute  vec4 vColor;
+        attribute  vec2 vTexCoord;
+        
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+        
+        varying vec4 fColor;
+        varying vec2 fTexCoord;
+        
+        uniform vec3 theta;
+        
+        void main() {
+            fColor = vColor;
+            fTexCoord = vTexCoord;
+            gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+        } 
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec4 fColor;
+        varying  vec2 fTexCoord;
+        
+        uniform sampler2D texture;
+        
+        void main(){
+            gl_FragColor = texture2D( texture, fTexCoord );
+        }
+    </script>
+
+    <body>
+        <h1>Part 3:</h1>
+        <canvas id="c" height="512" width="512">
+            Please use a HTML5 supported browser.
+        </canvas>
+    </body>
+</html>

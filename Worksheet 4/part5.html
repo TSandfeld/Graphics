@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<head>
+    <title>02561 Worksheet 4 - Part 5</title>
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../common/initShaders.js"></script>
+    <script type="text/javascript" src="../common/MV.js"></script>
+    <script type="text/javascript" src="part5.js"></script>
+</head>
+<html>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec4 vNormal;
+
+        varying vec3 N, L, E;
+
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+        uniform vec4 lightPosition;
+        uniform mat3 normalMatrix;
+
+        void main() 
+        {
+            // pos is vertex position in eye coordinates
+            vec3 pos = (modelViewMatrix * vPosition).xyz;
+            
+            // check for directional light
+            if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
+            else L = normalize(lightPosition.xyz - pos);
+
+            // Because the eye point the is at the orgin
+            // the vector from the vertex position to the eye is    
+            E = -normalize(pos);
+
+            // Transform vertex normal into eye coordinates
+            N = normalize(normalMatrix*vNormal.xyz);
+
+            gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        uniform vec4 adsProduct;
+        uniform float shininess;
+        varying vec3 N, L, E;
+        vec4 fColor;
+
+        void main() 
+        {
+            // halfway vector
+            vec3 H = normalize(L + E);
+
+            // Compute terms in the illumination equation
+            vec4 ambient = adsProduct;
+
+            float Kd = max(dot(L, N), 0.0);
+            vec4  diffuse = Kd * adsProduct;
+
+            float Ks = pow(max(dot(N, H), 0.0), shininess);
+            vec4  specular = Ks * adsProduct;
+            
+            if(dot(L, N) < 0.0) {
+                specular = vec4(0.0, 0.0, 0.0, 1.0);
+            } 
+
+            fColor = ambient + diffuse + specular;
+            fColor.a = 1.0;
+
+            gl_FragColor = fColor;
+        }
+    </script>
+
+    <body>
+        <h1>Part 5:</h1>
+        <button onclick="decrementSubdivision()">Decrement</button>
+        <button onclick="incrementSubdivision()">Increment</button>
+        <p id="level">Subdivision level = 3</p>
+        <div>
+            ka 0 
+            <input id="slider_ka" type="range" min="0" max="1" step="0.01" value="0.25" />
+            1
+        </div>
+        <div>
+            kd 0 
+            <input id="slider_kd" type="range" min="0" max="1" step="0.01" value="0.25" />
+            1
+        </div>
+        <div>
+            ks 0 
+            <input id="slider_ks" type="range" min="0" max="1" step="0.01" value="0.25" />
+            1 
+        </div>
+        <div>
+            a  0 
+            <input id="slider_a" type="range" min="0" max="1" step="0.01" value="1" />
+            1 
+        </div>
+        <div>
+            emission 0 
+            <input id="slider_emission" type="range" min="0" max="5" step="0.05" value="1.5" />
+            5 
+        </div>
+        <canvas id="c" height="512" width="512">
+            Please use a HTML5 supported browser.
+        </canvas>
+
+        </br>
+
+        <b>
+            <p>
+                Is Gouraud or Phong shading the best method for simulating highlight? Explain.
+            </p>
+        </b>
+        <i>
+            <p>
+                The most serious problem with Gouraud shading occurs when specular highlights are found 
+                in the middle of a large polygon. Since these specular highlights are absent from the polygon's 
+                vertices and Gouraud shading interpolates based on the vertex colors, the specular highlight will be 
+                missing from the polygon's interior. This problem is fixed by Phong shading.
+            </p>
+        </i>
+    </body>
+</html>

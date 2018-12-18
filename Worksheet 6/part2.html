@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<head>
+    <title>02561 Worksheet 6 - Part 2</title>
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../common/initShaders.js"></script>
+    <script type="text/javascript" src="../common/MV.js"></script>
+    <script type="text/javascript" src="part2.js"></script>
+</head>
+<html>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute  vec4 vPosition;
+        attribute  vec4 vColor;
+        attribute  vec2 vTexCoord;
+
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+
+        varying vec4 fColor;
+        varying vec2 fTexCoord;
+
+        void main() {
+            fColor = vColor;
+            fTexCoord = vTexCoord;
+            gl_Position = projectionMatrix * modelViewMatrix * vPosition;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        varying vec4 fColor;
+        varying  vec2 fTexCoord;
+
+        uniform sampler2D texture;
+
+        void main(){
+            gl_FragColor = fColor * texture2D( texture, fTexCoord );
+        }
+    </script>
+
+    <body>
+        <h1>Part 2:</h1>
+
+        <p>Texture wrapping modes:</p>
+        <input id="wrapRepeat" type="radio" name="wrap" value="Repeat" onchange="setMode(this)">Repeat
+        <input id="wrapClamp" type="radio" name="wrap" value="Clamp" onchange="setMode(this)">Clamp-to-edge <br>
+
+        <p>Texture filtering modes:</p>
+        <input id="filterNearest" type="radio" name="mode" value="Nearest" onchange="setMode(this)">Nearest
+        <input id="filterLinear" type="radio" name="mode" value="Linear" onchange="setMode(this)">Linear
+        <input id="filterMipmap" type="radio" name="mode" value="Mipmap" onchange="setMode(this)">Mipmap <br>
+
+        <canvas id="c" height="512" width="512">
+            Please use a HTML5 supported browser.
+        </canvas>
+
+        <p>
+            <b>
+                Explain the effect of the different filtering modes and their influence on texture magnification and minification issues.
+            </b>
+        </p>
+        <p>
+            <i>
+                gl.NEAREST uses the value of the texel closest to the texture coordinate given by the rasterizer.
+                This is known as point sampling. Point sampling is however also prone to visible aliasing errors.
+            </i>
+        </p>
+        <p>
+            <i>
+                gl.LINEAR uses the weighted average of neighbouring texels of the point determined by point sampling.
+                This is known as linear filtering, and does require some more work, but gives a smoother value. 
+                There is a problem here at the edges of the texture, as there are not enough neighbouring texels.
+            </i>
+        </p>
+    </body>
+</html>

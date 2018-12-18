@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>02561 Worksheet 8 - Part 2</title>
+
+    
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../common/initShaders.js"></script>
+    <script type="text/javascript" src="../common/MV.js"></script>
+    <script type="text/javascript" src="../common/OBJParser.js"></script>
+    <script type="text/javascript" src="part2.js"></script>
+    
+
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        precision mediump float;
+        
+        attribute vec4 attrPos;
+        attribute vec2 attrTex;
+        
+        varying vec2 v_textureCoords;
+        varying vec4 v_position;
+        
+        uniform mat4 uniformMV, uniformProjection;
+        uniform mat4 uniformDepthMVP;
+        
+        void main() {
+            v_textureCoords = attrTex;
+            v_position = uniformDepthMVP * attrPos;
+            gl_Position = uniformProjection * uniformMV * attrPos;
+        }                 
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec2 v_textureCoords;
+        varying vec4 v_position;
+        
+        uniform sampler2D uniformTex, uniformShadow;
+        uniform mat4 uniformDepthMVP;
+        
+        void main() {
+            vec3 depth = (v_position.xyz / (v_position.w)) * 0.5 + 0.5;
+            float shadowValue = texture2D(uniformShadow, depth.xy).r;
+            float shadow = 1.0;
+            if (shadowValue < depth.z) {
+                shadow = 0.5;
+            }
+            vec4 color = texture2D(uniformTex, v_textureCoords) * shadow;
+            color.a = 1.0;
+            gl_FragColor = color;
+        }   
+    </script>
+
+    <script id="vertex-shader-g" type="x-shader/x-vertex">
+        precision mediump float;
+        
+        attribute vec3 attrPosModel, attrNormalModel;
+        
+        varying vec3 v_normal_camera, v_eye_camera, v_light_camera;
+        varying vec4 v_position_depth;
+        
+        uniform mat4 uniformNormal, uniformMV, uniformProjection, uniformDepthMVP;
+        uniform vec3 uniformLight;
+        
+        void main() {
+            vec3 position_camera = (uniformMV * vec4(attrPosModel, 0)).xyz;
+            v_light_camera = (uniformMV * vec4(uniformLight, 0)).xyz;
+            v_eye_camera = position_camera;
+            v_normal_camera = (uniformNormal * vec4(attrNormalModel, 0)).xyz;
+            v_position_depth = vec4(attrPosModel, 1.0) * uniformDepthMVP;
+            
+            gl_Position = uniformProjection * uniformMV * vec4(attrPosModel, 1.0);
+        }
+    </script>
+
+    <script id="fragment-shader-g" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec3 v_normal_camera, v_eye_camera, v_light_camera;
+        varying vec4 v_position_depth;
+        
+        uniform sampler2D uniformShadow;
+        
+        void main() {
+            vec3 n = normalize(v_normal_camera);
+            vec3 l = normalize(v_light_camera);
+            vec3 e = normalize(v_eye_camera);
+            vec3 r = normalize(2.0 * dot(l, n) * n - l);
+        
+            // Pearl material
+            vec3 ka = vec3(0.25, 0.20725, 0.20725);
+            vec3 ks = vec3(0.296648, 0.296648, 0.296648);
+            vec3 kd = vec3(1, 0.829, 0.829);
+            float shininess = 11.264;
+            
+            vec3 ambient = ka;
+            
+            float cosAngle = dot(l, n);
+            vec3 diffuse = kd * max(cosAngle, 0.0);
+        
+            vec3 specular = ks * pow(max(dot(r, e), 0.0), shininess);
+        
+            if (cosAngle < 0.0) {
+                specular = vec3(0.0);
+            }
+            
+            vec3 depth = (v_position_depth.xyz / (v_position_depth.w)) * 0.5 + 0.5;
+            float shadowValue = texture2D(uniformShadow, depth.xy).r;
+            float shadow = 1.0;
+            if (shadowValue < depth.z) {
+                shadow = 0.5;
+            }
+        
+            gl_FragColor = vec4((ambient + diffuse + specular), 1.0) * shadow;
+        }          
+    </script>
+
+    <script id="vertex-shader-d" type="x-shader/x-vertex">
+        precision mediump float;
+        
+        attribute vec4 attrPos;
+        
+        varying vec4 v_position_camera;
+        
+        uniform mat4 uniformMV, uniformProjection;
+        
+        void main() {
+            vec4 position_camera = uniformProjection * uniformMV * attrPos;
+            v_position_camera = position_camera; 
+            gl_Position = position_camera;
+        }                
+    </script>
+    <script id="fragment-shader-d" type="x-shader/x-fragment">
+        precision mediump float;
+        
+        varying vec4 v_position_camera;
+        
+        void main() {
+            float z = normalize(v_position_camera).z;
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }                                        
+    </script>
+</head>
+
+<body>
+    <h1>Part 2:</h1>
+    <button onclick="switchTeapot()" class="btn btn-primary">Teapot moving</button>
+    <button onclick="switchLight()" class="btn btn-primary">Point light</button>
+    <canvas id="c" width="512" height="512">
+        Your browser doesn't support the HTML5 canvas element
+    </canvas>
+
+</body>
+</html>

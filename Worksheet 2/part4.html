@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<head>
+    <title>02561 Worksheet 2 - Part 4</title>
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../common/initShaders.js"></script>
+    <script type="text/javascript" src="../common/MV.js"></script>
+    <script type="text/javascript" src="part4.js"></script>
+</head>
+<html>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec4 vPosition;
+        attribute vec4 vColor;
+        varying vec4 fColor;
+
+        void main() 
+        {
+            fColor = vColor;
+            gl_Position = vPosition;
+            gl_PointSize = 20.0;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        varying vec4 fColor;
+
+        void main() 
+        {
+            gl_FragColor = fColor;
+        }
+    </script>
+
+    <body>
+        <h1>Part 4:</h1>
+        <button id="pointMode" onclick="togglePointMode()">Add Points</button>
+        <button id="triangleMode" onclick="toggleTriangleMode()">Add Triangles</button>
+        <button id="circleMode" onclick="toggleCircleMode()">Add Circles</button>
+        <p>Click on canvas to add elements.</p>
+        <canvas id="c" height="512" width="512" onclick="canvasClicked()">
+            Please use a HTML5 supported browser.
+        </canvas>
+        <select id="colorMenu" size="9" onclick="colorMenuClicked()">
+            <option value="0" selected>Black</option>
+            <option value="1">Red</option>
+            <option value="2">Yellow</option>
+            <option value="3">Green</option>
+            <option value="4">Blue</option>
+            <option value="5">Magenta</option>
+            <option value="6">Cyan</option>
+            <option value="7">White</option>
+            <option value="8">Cornflower</option>
+        </select>
+        <button id="clear" onclick="clearCanvas()">Clear canvas</button>
+    </body>
+</html>

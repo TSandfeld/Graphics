@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<head>
+    <title>02561 Worksheet 10 - Part 4</title>
+    <script type="text/javascript" src="../common/webgl-utils.js"></script>
+    <script type="text/javascript" src="../common/initShaders.js"></script>
+    <script type="text/javascript" src="../common/MV.js"></script>
+    <script type="text/javascript" src="../common/OBJParser.js"></script>
+    <script type="text/javascript" src="part4.js"></script>
+</head>
+<html>
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        precision mediump float;
+
+        attribute vec4 vPosition;
+
+        varying vec3 fTexCoords;
+
+        uniform mat4 modelViewMatrix;
+        uniform mat4 projectionMatrix;
+        uniform mat4 mTexture;
+
+        void main() 
+        {
+            fTexCoords = (mTexture * vPosition).xyz;
+            gl_Position = ((projectionMatrix*modelViewMatrix) * vPosition);
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision mediump float;
+
+        varying vec3 fTexCoords;
+
+        uniform samplerCube texture;
+        uniform sampler2D vNormals;
+        uniform vec3 vEye;
+        uniform bool isReflective;
+
+        vec3 rotate_to_normal(vec3 normal, vec3 v) {
+            float a = 1.0/(1.0 + normal.z);
+            float b = -normal.x*normal.y*a;
+            return vec3(1.0 - normal.x*normal.x*a, b, -normal.x)*v.x 
+                    + vec3(b, 1.0 - normal.y*normal.y*a, -normal.y)*v.y 
+                    + normal*v.z;
+        }
+
+        float atan2(float y, float x) {
+            return 2.0 * atan((length(vec2(x, y)) - x) / y);
+        }
+
+        void main() {
+            float pi = 3.1415926;
+            vec3 normals = fTexCoords;
+            vec3 worldPos = fTexCoords;
+            vec3 actualCoords = fTexCoords;
+
+            if (isReflective) {
+                float u = 0.5 + atan2(normals.z, - normals.x) / (2.0 * pi);
+                float v = 0.5 - (asin(normals.y) / pi);
+
+                vec3 tangent = texture2D(vNormals, vec2(u,v)).xyz * 2.0 - 1.0;
+                normals = rotate_to_normal(normals, tangent);
+                
+                vec3 incident = worldPos - vEye;
+                normals = reflect(incident, normals);
+
+                gl_FragColor = textureCube(texture, normals);
+            } else {
+                gl_FragColor = textureCube(texture, fTexCoords);
+            }
+        }
+    </script>
+
+    <body>
+        <h1>Part 4:</h1>
+        <canvas id="c" height="512" width="512">
+            Please use a HTML5 supported browser.
+        </canvas>
+    </body>
+</html>
