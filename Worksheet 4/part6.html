@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <head>
     <title>02561 Worksheet 4 - Part 6</title>
+    <link rel="stylesheet" type="text/css" href="../stylesheet.css">
 </head>
 <html>
 
@@ -16,7 +17,13 @@
         </b>
         <i>
             <p>
-                
+                Phong shading is an interpolation technique for calculating surface colors based on interpolated normals.
+            </p>
+            <p>
+                Phong lighting (or the Phong reflection model) is a mathematical model for calculating local illumination points.
+            </p>
+            <p>
+                The two concepts are often used together.
             </p>
         </i>
 
@@ -27,7 +34,13 @@
         </b>
         <i>
             <p>
-                
+                Flat shading is shading by per-fragment interpolation with a single normal vector per polygon. This method is simple and efficient, but is very prone to Mach Bands and gives a very faceted look that is quite disappointing.
+            </p>
+            <p>
+                Gouraud shading is shading by per-vertex interpolation. Like Flat shading, each polygon has a normal vector, but in Gouraud shading these vectors are not interpolated. Instead the color in each vertex is computed and interpolated on the polygon. Gouraud shading is still prone to Mach Bands, just like Flat shading, but not as much.
+            </p>
+            <p>
+                Phong shading is shading by per-fragment interpolation with as many normals as vertices. It has got as many normal vectors as it has vertices. Of the three shading techniques this is the most complex but also gives better results.
             </p>
         </i>
 
@@ -38,7 +51,7 @@
         </b>
         <i>
             <p>
-                
+                A directional light is further away from the object than a point light and needs less calculations. The idea is that a point light needs more recalculations than a directional light as it moves across a surface. This is because when a light is further from the object, the vector does not change as much as when moving from point to point. 
             </p>
         </i>
 
@@ -49,7 +62,7 @@
         </b>
         <i>
             <p>
-                
+                We believe that the eye does not influence the shading calculation. It might give the object another look as the shadow will "move" around the object as the eye is set at different locations.
             </p>
         </i>
 
@@ -60,18 +73,18 @@
         </b>
         <i>
             <p>
-                
+                The specular term is responsible for highlighting the object according to the light source hitting it. Setting this term to (0,0,0) will remove this highlighting and make the object look dull.
             </p>
         </i>
 
         <b>
             <p>
-                What is the effect of increasing the shininess exponent (alpha)? 
+                What is the effect of increasing the shininess exponent (&alpha;)? 
             </p>
         </b>
         <i>
             <p>
-                
+                If &alpha; is increased, the reflected light is focused on a narrower part centered on the angle of a perfect reflector.
             </p>
         </i>
 
@@ -82,7 +95,7 @@
         </b>
         <i>
             <p>
-                
+                Object space.
             </p>
         </i>
     </body>

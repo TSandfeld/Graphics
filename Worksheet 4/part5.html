@@ -5,6 +5,7 @@
     <script type="text/javascript" src="../common/initShaders.js"></script>
     <script type="text/javascript" src="../common/MV.js"></script>
     <script type="text/javascript" src="part5.js"></script>
+    <link rel="stylesheet" type="text/css" href="../stylesheet.css">
 </head>
 <html>
     <script id="vertex-shader" type="x-shader/x-vertex">
@@ -117,6 +118,9 @@
                 in the middle of a large polygon. Since these specular highlights are absent from the polygon's 
                 vertices and Gouraud shading interpolates based on the vertex colors, the specular highlight will be 
                 missing from the polygon's interior. This problem is fixed by Phong shading.
+                Phong shading is better because each rendered polygon has a normal vector per vertex. 
+                Interpolation on these normals across each polygon gives a reasonable smooth surface whilst 
+                using a reduced number of polygons.
             </p>
         </i>
     </body>
