@@ -79,5 +79,17 @@
             Explain how you obtain and use surface normals, and explain how this relates to the surface smoothness when you are rendering a triangle mesh.
         </p>
     </b>
+    
+    <i>
+        <p>
+            The surface normals are obtained from the modelmatrix by creating vectors of the elements of each 
+            row of the modelmatrix and combining them into an array.
+            When rendering a triangle mesh, it is important to obtain the normals of the surface in order to be
+            able to render a smooth image. Otherwise when rendering, the normal is assumed to be something which 
+            is inaccurate, resulting in a figure with more edges, and less smoothness. This is why it is very 
+            important to obtain the normals of the vertices which are "edges", if the goal is to obtain a smooth 
+            rendering.
+        </p>
+    </i>
 </body>
 </html>
