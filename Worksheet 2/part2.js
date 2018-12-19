@@ -19,12 +19,10 @@ window.onload = function() {
     gl.useProgram(program);
 
     chosenColor = [0.0, 0.0, 0.0, 1.0]; // Black
-    // renderPoints();
 }
 
 
 function canvasClicked() {
-    console.log("clicked!");
     const mouseRect = event.target.getBoundingClientRect()
     const x = event.clientX - mouseRect.left/2 - 5; // 5 is radius/2, where radius = pointSize/2 in shader
     const y = event.clientY - mouseRect.top;

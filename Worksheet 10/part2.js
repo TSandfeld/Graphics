@@ -36,10 +36,6 @@ var vb = vec3(0.0, 0.942809, -0.333333);
 var vc = vec3(-0.816497, -0.471405, -0.333333);
 var vd = vec3(0.816497, -0.471405, -0.333333);
 
-// var va = vec4(0.0, 0.0, 1.0, 1);
-// var vb = vec4(0.0, 0.942809, -0.333333, 1);
-// var vc = vec4(-0.816497, -0.471405, -0.333333, 1);
-// var vd = vec4(0.816497, -0.471405, -0.333333, 1);
   
 var pointsArray = [];
 var subdivisionLevel = 5;
@@ -182,11 +178,6 @@ function configureTexture() {
 }
 
 function render() {
-    // theta += 0.01;
-    
-    // eye[0] = 2+ Math.sin(theta);
-    // eye[2] = 2+ Math.cos(theta);
-    // modelViewMatrix = lookAt(eye, at, up);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 

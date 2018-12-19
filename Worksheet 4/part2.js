@@ -35,7 +35,6 @@ var indices = [
     0, 1, 5
   ];
 
-// var numVertices  = indices.length;
 
 
 // Tetrahedron
@@ -64,7 +63,6 @@ window.onload = function() {
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    // createCube(0.0, 30, 30);
     createSphere();
 }
 

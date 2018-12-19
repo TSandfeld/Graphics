@@ -20,21 +20,6 @@ var vertexColors = [
     [ 0.0, 1.0, 1.0, 1.0 ]   // cyan
 ];
 
-// var indices = [
-//     1, 0, 3,
-//     3, 2, 1,
-//     2, 3, 7,
-//     7, 6, 2,
-//     3, 0, 4,
-//     4, 7, 3,
-//     6, 5, 1,
-//     1, 2, 6,
-//     4, 5, 6,
-//     6, 7, 4,
-//     5, 4, 0,
-//     0, 1, 5
-//   ];
-
 var indices = [
     0, 1,
     1, 2,
@@ -78,7 +63,6 @@ window.onload = function() {
     program = initShaders(gl, "vertex-shader", "fragment-shader");
     gl.useProgram(program);
 
-    // createCube(0.0, 30, 30);
     createSphere();
 }
 
@@ -211,5 +195,4 @@ function scaleCube(matrix, scale) {
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     gl.drawArrays(gl.LINES, 0, pointsArray.length);
-    // gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_BYTE, 0);
 }

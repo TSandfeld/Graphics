@@ -24,15 +24,11 @@
             // pos is vertex position in eye coordinates
             vec3 pos = (modelViewMatrix * vPosition).xyz;
             
-            // check for directional light
             if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
             else L = normalize(lightPosition.xyz - pos);
-
-            // Because the eye point the is at the orgin
-            // the vector from the vertex position to the eye is    
+ 
             E = -normalize(pos);
 
-            // Transform vertex normal into eye coordinates
             N = normalize(normalMatrix*vNormal.xyz);
 
             gl_Position = projectionMatrix * modelViewMatrix * vPosition;

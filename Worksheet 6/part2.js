@@ -58,7 +58,6 @@ window.onload = function() {
 }
 
 function setMode(element) {
-    console.log(element.value);
     var val = element.value;
     if (val == "Repeat") {
         chosenWrap = gl.REPEAT;

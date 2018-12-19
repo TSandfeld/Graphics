@@ -135,9 +135,6 @@ function setView() {
     modelViewMatrix = scaleObject(modelViewMatrix, 0.5);
 
     projectionMatrix = ortho(left, right, bottom, ytop, near, far);
-    
-    // var projectionMatrix = translate(0, 0, 0);
-    // projectionMatrix = perspective(45, 1, near, far);
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
@@ -180,10 +177,6 @@ function render() {
 
     gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     gl.uniformMatrix4fv(projectionMatrixLoc, false, flatten(projectionMatrix));
-
-    // var modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
-    // modelViewMatrix = mult(modelViewMatrix, rotateY(1));
-    // gl.uniformMatrix4fv(modelViewMatrixLoc, false, flatten(modelViewMatrix));
     
     gl.drawArrays(gl.TRIANGLES, 0, pointsArray.length);
     requestAnimFrame(render);

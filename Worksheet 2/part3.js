@@ -66,8 +66,6 @@ function canvasClicked() {
 
         triCount = 0;
     }
-    console.log(points);
-    console.log(triangles);
     
     numPoints++;
     renderPoints();

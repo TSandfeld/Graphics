@@ -181,6 +181,5 @@ function setIsometric() {
 
 function render() {
     gl.clear(gl.COLOR_BUFFER_BIT  | gl.DEPTH_BUFFER_BIT);
-    // gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_BYTE, 0);
     gl.drawArrays( gl.TRIANGLES, 0, 6 );
 }

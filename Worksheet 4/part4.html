@@ -30,21 +30,13 @@
             // vector from vertex position to light source
             vec3 L;
             
-            // check for directional light
             if(lightPosition.w == 0.0) L = normalize(lightPosition.xyz);
             else L = normalize( lightPosition.xyz - pos );
 
-            // Because the eye point the is at the orgin
-            // the vector from the vertex position to the eye is    
             vec3 E = -normalize( pos );
-            
-            // halfway vector
             vec3 H = normalize( L + E );
-
-            // Transform vertex normal into eye coordinates
             vec3 N = normalize( normalMatrix*vNormal.xyz);
 
-            // Compute terms in the illumination equation
             vec4 ambient = adsProduct;
 
             float Kd = max( dot(L, N), 0.0 );

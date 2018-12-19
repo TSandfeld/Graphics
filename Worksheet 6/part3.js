@@ -78,7 +78,7 @@ function multiplyMatrixByVector(M, v) {
         }
         Mv.push(sum);
     }
-    // AND MY
+    
     return Mv;
 }
 
