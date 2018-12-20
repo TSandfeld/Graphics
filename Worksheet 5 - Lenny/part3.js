@@ -8,18 +8,15 @@ var up = vec3(0.0, 1.0, 0.0);
 
 var canvas;
 
-function WebGLStart() { 
+window.onload = function() { 
 
     canvas = document.getElementById('c');
 
-    // Get the rendering context for WebGL
     gl = WebGLUtils.setupWebGL( canvas );
     if (!gl) {
-        console.log('Failed to get the rendering context for WebGL');
         return;
     }
 
-    // Set the clear color and enable the depth test
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0)    
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.enable(gl.DEPTH_TEST);
@@ -29,27 +26,22 @@ function WebGLStart() {
     program = initShaders( gl, "vertex-shader", "fragment-shader" );
     gl.useProgram( program );
 
-    // Get the storage locations of attribute and uniform variables
     a_Position = gl.getAttribLocation(program, 'a_Position');
     a_Color = gl.getAttribLocation(program, 'a_Color');
     u_MvpMatrix = gl.getUniformLocation(program, 'u_MvpMatrix');
 
 
-    // Prepare empty buffer objects for vertex coordinates and colors
     var model = initVertexBuffers();
 
-    // define projection and view matrices
     var projectionMatrix = perspective(45, canvas.width / canvas.height, 0.1, 5000.0);
     
     var viewMatrix = lookAt(eye, at, up);
 
-    // calculate viewProjection Matrix
     var viewProjMatrix = mult(projectionMatrix, viewMatrix);
 
-    // Start reading the OBJ file
     readOBJFile('teapot.obj', model, 60, true);
 
-    var tick = function() {   // Start drawing
+    var tick = function() { 
         render(viewProjMatrix, model);
         requestAnimationFrame(tick);
       };

@@ -1,5 +1,5 @@
 var near = 0.1;
-var far = 30;
+var far = 1000;
 var fovy = 45;
 var aspect = 1
 
@@ -47,6 +47,12 @@ var pointLightMoving = true;
 var phi = 0;
 var theta = 0;
 
+var teapotVariables = {};
+var groundVariables = {};
+
+var program;
+var groundProgram;
+
 function switchTeapot(){
     teapotMoving = !teapotMoving;
 };
@@ -70,8 +76,6 @@ function loadTeapot() {
     teapot = new OBJDoc('teapot.obj');
     teapot.parse(teapotFile, 0.25, false);
 
-    
-
     for (var i = 0; i < teapot.objects[0].faces.length; i++) {
         face = teapot.objects[0].faces[i];
         for (var j = 0; j < 3; j++) {
@@ -81,6 +85,60 @@ function loadTeapot() {
             normals.push(vec3(normal.x, normal.y, normal.z));
             textureCoords.push(vec3(0, 0, 0));
         }
+    }
+}
+
+function bindBuffersForTeapot() {
+    
+    //Bind buffers
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVariables.attrPos.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVariables.attrTexCoords.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoords), gl.STATIC_DRAW);
+}
+
+function bindBuffersForGround() {
+    gl.bindBuffer(gl.ARRAY_BUFFER, groundVariables.attrPosModel.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
+    
+    gl.bindBuffer(gl.ARRAY_BUFFER, groundVariables.attrNormalModel.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(normals), gl.STATIC_DRAW);
+}
+
+
+function initTeapotDataBuffers() {
+    //Setup op object with buffers and location references
+    teapotVariables = {
+        attrPos: {
+            location: gl.getAttribLocation(program, 'attrPos'),
+            buffer: gl.createBuffer()
+        },
+        attrTexCoords: {
+            location: gl.getAttribLocation(program, 'attrTexCoords'),
+            buffer: gl.createBuffer()
+        },
+        uniformModelView: gl.getUniformLocation(program, 'uniformModelView'),
+        uniformProjection: gl.getUniformLocation(program, 'uniformProjection'),
+        uniformTex: gl.getUniformLocation(program, 'uniformTex')
+    };
+}
+
+function initGroundDataBuffers() {
+    //Setup op object with buffers and location references
+    groundVariables = {
+        attrPosModel: {
+            location: gl.getAttribLocation(groundProgram, 'attrPosModel'),
+            buffer: gl.createBuffer()
+        },
+        attrNormalModel: {
+            location: gl.getAttribLocation(groundProgram, 'attrNormalModel'),
+            buffer: gl.createBuffer()
+        },
+        uniformModelView: gl.getUniformLocation(groundProgram, 'uniformModelView'),
+        uniformProjection: gl.getUniformLocation(groundProgram, 'uniformProjection'),
+        uniformNormal: gl.getUniformLocation(groundProgram, 'uniformNormal'),
+        uniformLight: gl.getUniformLocation(groundProgram, 'uniformLight')
     }
 }
 
@@ -113,6 +171,7 @@ window.onload = function() {
     groundProgram = initShaders( gl, "vertex-shader-g", "fragment-shader-g" );
     gl.useProgram( program );
 
+    //Init gl-vars
     gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
     gl.clear(gl.COLOR_BUFFER_BIT  | gl.DEPTH_BUFFER_BIT);
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
@@ -122,47 +181,14 @@ window.onload = function() {
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
     gl.useProgram(program);
-    teapotVariables = {
-        attrPos: {
-            location: gl.getAttribLocation(program, 'attrPos'),
-            buffer: gl.createBuffer()
-        },
-        attrTexCoords: {
-            location: gl.getAttribLocation(program, 'attrTexCoords'),
-            buffer: gl.createBuffer()
-        },
-        uniformModelView: gl.getUniformLocation(program, 'uniformModelView'),
-        uniformProjection: gl.getUniformLocation(program, 'uniformProjection'),
-        uniformTex: gl.getUniformLocation(program, 'uniformTex')
-    };
+    initTeapotDataBuffers();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVariables.attrPos.buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, teapotVariables.attrTexCoords.buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoords), gl.STATIC_DRAW);
+    bindBuffersForTeapot();
    
     gl.useProgram(groundProgram);
-    groundVariables = {
-        attrPosModel: {
-            location: gl.getAttribLocation(groundProgram, 'attrPosModel'),
-            buffer: gl.createBuffer()
-        },
-        attrNormalModel: {
-            location: gl.getAttribLocation(groundProgram, 'attrNormalModel'),
-            buffer: gl.createBuffer()
-        },
-        uniformModelView: gl.getUniformLocation(groundProgram, 'uniformModelView'),
-        uniformProjection: gl.getUniformLocation(groundProgram, 'uniformProjection'),
-        uniformNormal: gl.getUniformLocation(groundProgram, 'uniformNormal'),
-        uniformLight: gl.getUniformLocation(groundProgram, 'uniformLight')
-    }
     
-    gl.bindBuffer(gl.ARRAY_BUFFER, groundVariables.attrPosModel.buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
-    
-    gl.bindBuffer(gl.ARRAY_BUFFER, groundVariables.attrNormalModel.buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(normals), gl.STATIC_DRAW);
+    initGroundDataBuffers();
+    bindBuffersForGround();
     
     gl.uniformMatrix4fv(groundVariables.uniformProjection, false, flatten(projectionMatrix));
 

@@ -1,5 +1,5 @@
 var near = 0.1;
-var far = 30;
+var far = 1000;
 var fovy = 45;
 var aspect = 1
 
@@ -44,6 +44,18 @@ var teapotMoving = true;
 var pointLightMoving = true;
 var phi = 0;
 var theta = 0;
+
+var program;
+var groundProgram;
+var depthProgram;
+
+var teapotVariables;
+var groundVariables;
+var depthVariables;
+
+var colorTexture;
+var depthTexture;
+var framebuffer;
 
 function switchTeapot(){
     teapotMoving = !teapotMoving;
@@ -101,32 +113,53 @@ function createTextures(gl, groundImage) {
     
 }
 
+function initTeapotDataBuffers() {
+    teapotVariables = {
+        attrPos: {
+            location: gl.getAttribLocation(program, 'attrPos'),
+            buffer: gl.createBuffer()
+        },
+        attrTex: {
+            location: gl.getAttribLocation(program, 'attrTex'),
+            buffer: gl.createBuffer()
+        },
+        uniformMV: gl.getUniformLocation(program, 'uniformMV'),
+        uniformProjection: gl.getUniformLocation(program, 'uniformProjection'),
+        uniformTex: gl.getUniformLocation(program, 'uniformTex'),
+        uniformShadow: gl.getUniformLocation(program, 'uniformShadow'),
+        uniformDepthMVP: gl.getUniformLocation(program, 'uniformDepthMVP')
+    };
+}
 
-window.onload = function () {    
-    canvas = document.getElementById( "c" );
+function initGroundDataBuffers() {
+    groundVariables = {
+        attrPosModel: {
+            location: gl.getAttribLocation(groundProgram, 'attrPosModel'),
+            buffer: gl.createBuffer()
+        },
+        attrNormalModel: {
+            location: gl.getAttribLocation(groundProgram, 'attrNormalModel'),
+            buffer: gl.createBuffer()
+        },
+        uniformMV: gl.getUniformLocation(groundProgram, 'uniformMV'),
+        uniformProjection: gl.getUniformLocation(groundProgram, 'uniformProjection'),
+        uniformNormal: gl.getUniformLocation(groundProgram, 'uniformNormal'),
+        uniformLight: gl.getUniformLocation(groundProgram, 'uniformLight')
+    }
+}
 
-    gl = WebGLUtils.setupWebGL(canvas, { alpha: false });
-    gl.viewportWidth = canvas.width;
-    gl.viewportHeight = canvas.height;
+function initDepthDataBuffers() {
+    depthVariables = {
+        attrPos: {
+            location: gl.getAttribLocation(depthProgram, 'attrPos'),
+            buffer: gl.createBuffer()
+        },
+        uniformMV: gl.getUniformLocation(depthProgram, 'uniformMV'),
+        uniformProjection: gl.getUniformLocation(depthProgram, 'uniformProjection')
+    }
+}
 
-    initTeapot();
-    program = initShaders( gl, "vertex-shader", "fragment-shader" );
-    phongProgram = initShaders( gl, "vertex-shader-g", "fragment-shader-g" );
-    depthProgram = initShaders( gl, "vertex-shader-d", "fragment-shader-d" );
-    
-    //Viewport
-    gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
-    gl.clear(gl.COLOR_BUFFER_BIT  | gl.DEPTH_BUFFER_BIT);
-    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    gl.enable(gl.DEPTH_TEST);
-    gl.enable(gl.BLEND);
-    gl.blendEquation(gl.FUNC_ADD);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-
-    depthTextureExt = gl.getExtension("WEBKIT_WEBGL_depth_texture") || gl.getExtension("WEBGL_depth_texture");
-    size = Math.pow(2,9);
-
+function createTextureForDepth() {
     colorTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, colorTexture);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -152,75 +185,74 @@ window.onload = function () {
     gl.bindTexture(gl.TEXTURE_2D, null);
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+}
 
-    // Setup shader and buffer data
-    gl.useProgram(program);
-    teapotVariables = {
-        attrPos: {
-            location: gl.getAttribLocation(program, 'attrPos'),
-            buffer: gl.createBuffer()
-        },
-        attrTex: {
-            location: gl.getAttribLocation(program, 'attrTex'),
-            buffer: gl.createBuffer()
-        },
-        uniformMV: gl.getUniformLocation(program, 'uniformMV'),
-        uniformProjection: gl.getUniformLocation(program, 'uniformProjection'),
-        uniformTex: gl.getUniformLocation(program, 'uniformTex'),
-        uniformShadow: gl.getUniformLocation(program, 'uniformShadow'),
-        uniformDepthMVP: gl.getUniformLocation(program, 'uniformDepthMVP')
-    };
-
+function bindBuffersForTeapot() {
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVariables.attrPos.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, teapotVariables.attrTex.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(textureCoords), gl.STATIC_DRAW);
  
-    gl.useProgram(phongProgram);
-    groundVariables = {
-        attrPosModel: {
-            location: gl.getAttribLocation(phongProgram, 'attrPosModel'),
-            buffer: gl.createBuffer()
-        },
-        attrNormalModel: {
-            location: gl.getAttribLocation(phongProgram, 'attrNormalModel'),
-            buffer: gl.createBuffer()
-        },
-        uniformMV: gl.getUniformLocation(phongProgram, 'uniformMV'),
-        uniformProjection: gl.getUniformLocation(phongProgram, 'uniformProjection'),
-        uniformNormal: gl.getUniformLocation(phongProgram, 'uniformNormal'),
-        uniformLight: gl.getUniformLocation(phongProgram, 'uniformLight')
-    }
-    
+}
+
+function bindBuffersForGround() {
     gl.bindBuffer(gl.ARRAY_BUFFER, groundVariables.attrPosModel.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
     
     gl.bindBuffer(gl.ARRAY_BUFFER, groundVariables.attrNormalModel.buffer);
     gl.bufferData(gl.ARRAY_BUFFER, flatten(normals), gl.STATIC_DRAW);
+}
+
+function bindBuffersForDepth() {
+    gl.bindBuffer(gl.ARRAY_BUFFER, depthVariables.attrPos.buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
+}
+
+window.onload = function () {    
+    canvas = document.getElementById( "c" );
+
+    gl = WebGLUtils.setupWebGL(canvas, { alpha: false });
+    gl.viewportWidth = canvas.width;
+    gl.viewportHeight = canvas.height;
+
+    initTeapot();
+    program = initShaders( gl, "vertex-shader", "fragment-shader" );
+    groundProgram = initShaders( gl, "vertex-shader-g", "fragment-shader-g" );
+    depthProgram = initShaders( gl, "vertex-shader-d", "fragment-shader-d" );
+    
+    //Init gl-vars
+    gl.clearColor( 0.3921, 0.5843, 0.9294, 1.0 );
+    gl.clear(gl.COLOR_BUFFER_BIT  | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.enable(gl.DEPTH_TEST);
+    gl.enable(gl.BLEND);
+    gl.blendEquation(gl.FUNC_ADD);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    depthTextureExt = gl.getExtension("WEBKIT_WEBGL_depth_texture") || gl.getExtension("WEBGL_depth_texture");
+    size = Math.pow(2,9);
+
+    createTextureForDepth();
+
+    gl.useProgram(program);
+    initTeapotDataBuffers();
+    bindBuffersForTeapot();
+    
+    gl.useProgram(groundProgram);
+    initGroundDataBuffers();
+    bindBuffersForGround();
     
     gl.uniformMatrix4fv(groundVariables.uniformProjection, false, flatten(projectionMatrix));
 
     gl.useProgram(depthProgram);
-
-    depthInfo = {
-        attrPos: {
-            location: gl.getAttribLocation(depthProgram, 'attrPos'),
-            buffer: gl.createBuffer()
-        },
-        uniformMV: gl.getUniformLocation(depthProgram, 'uniformMV'),
-        uniformProjection: gl.getUniformLocation(depthProgram, 'uniformProjection')
-    }
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, depthInfo.attrPos.buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(positions), gl.STATIC_DRAW);
+    initDepthDataBuffers(); 
+    bindBuffersForDepth();
 
     createTextures(gl, groundImage);
     gl.useProgram(program);
     gl.uniformMatrix4fv(teapotVariables.uniformProjection, false, flatten(projectionMatrix));
     
-    
-
     requestAnimationFrame(function render() {
         if(teapotMoving) {
             phi += 0.02
@@ -254,12 +286,12 @@ window.onload = function () {
 
         gl.useProgram(depthProgram);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, depthInfo.attrPos.buffer);
-        gl.enableVertexAttribArray(depthInfo.attrPos.location);
-        gl.vertexAttribPointer(depthInfo.attrPos.location, 3, gl.FLOAT, false, 0, 0);    
+        gl.bindBuffer(gl.ARRAY_BUFFER, depthVariables.attrPos.buffer);
+        gl.enableVertexAttribArray(depthVariables.attrPos.location);
+        gl.vertexAttribPointer(depthVariables.attrPos.location, 3, gl.FLOAT, false, 0, 0);    
 
-        gl.uniformMatrix4fv(depthInfo.uniformProjection, false, flatten(projectionMatrix));
-        gl.uniformMatrix4fv(depthInfo.uniformMV, false, flatten(mult(depthViewMatrix, teapotModelMatrix)));
+        gl.uniformMatrix4fv(depthVariables.uniformProjection, false, flatten(projectionMatrix));
+        gl.uniformMatrix4fv(depthVariables.uniformMV, false, flatten(mult(depthViewMatrix, teapotModelMatrix)));
         
         gl.drawArrays(gl.TRIANGLES, 6, positions.length - 6);
         
@@ -289,7 +321,7 @@ window.onload = function () {
         gl.drawArrays(gl.TRIANGLES, 0, 6);
 
         gl.depthFunc(gl.LESS);
-        gl.useProgram(phongProgram);
+        gl.useProgram(groundProgram);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, groundVariables.attrPosModel.buffer);
         gl.enableVertexAttribArray(groundVariables.attrPosModel.location);
