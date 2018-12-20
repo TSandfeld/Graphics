@@ -115,17 +115,17 @@ function initTeapotDataBuffers() {
 function initGroundDataBuffers() {
     groundVariables = {
         attrPosModel: {
-            location: gl.getAttribLocation(groundProgram, 'attrPosModel'),
+            location: gl.getAttribLocation(gProgram, 'attrPosModel'),
             buffer: gl.createBuffer()
         },
         attrNormalModel: {
-            location: gl.getAttribLocation(groundProgram, 'attrNormalModel'),
+            location: gl.getAttribLocation(gProgram, 'attrNormalModel'),
             buffer: gl.createBuffer()
         },
-        uniformMV: gl.getUniformLocation(groundProgram, 'uniformMV'),
-        uniformProjection: gl.getUniformLocation(groundProgram, 'uniformProjection'),
-        uniformNormal: gl.getUniformLocation(groundProgram, 'uniformNormal'),
-        uniformLight: gl.getUniformLocation(groundProgram, 'uniformLight')
+        uniformMV: gl.getUniformLocation(gProgram, 'uniformMV'),
+        uniformProjection: gl.getUniformLocation(gProgram, 'uniformProjection'),
+        uniformNormal: gl.getUniformLocation(gProgram, 'uniformNormal'),
+        uniformLight: gl.getUniformLocation(gProgram, 'uniformLight')
     }
 }
 
@@ -322,12 +322,12 @@ window.onload = function () {
 
         gl.useProgram(depthProgram);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, depthInfo.attrPos.buffer);
-        gl.enableVertexAttribArray(depthInfo.attrPos.location);
-        gl.vertexAttribPointer(depthInfo.attrPos.location, 3, gl.FLOAT, false, 0, 0);    
+        gl.bindBuffer(gl.ARRAY_BUFFER, depthVariables.attrPos.buffer);
+        gl.enableVertexAttribArray(depthVariables.attrPos.location);
+        gl.vertexAttribPointer(depthVariables.attrPos.location, 3, gl.FLOAT, false, 0, 0);    
 
-        gl.uniformMatrix4fv(depthInfo.uniformProjection, false, flatten(projectionMatrix));
-        gl.uniformMatrix4fv(depthInfo.uniformMV, false, flatten(mult(depthViewMatrix, teapotModelMatrix)));
+        gl.uniformMatrix4fv(depthVariables.uniformProjection, false, flatten(projectionMatrix));
+        gl.uniformMatrix4fv(depthVariables.uniformMV, false, flatten(mult(depthViewMatrix, teapotModelMatrix)));
         
         gl.drawArrays(gl.TRIANGLES, 6, positions.length - 6);
         
